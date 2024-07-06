@@ -59,7 +59,7 @@ jobs:
         TG_SUPER=0
 
         # Isi token BOT disini
-        TG_TOKEN=5136791856:AAFxUsMFfPD7E0CFHKUCBIlUOUOI0yFq59Q
+        TG_TOKEN=7459706383:AAEEPCQkEALnVX8i_qOaZR1_B4aj4ulepxM
 
         # isi ID channel atau grup
         # Pastikan botnya sudah jadi admin
