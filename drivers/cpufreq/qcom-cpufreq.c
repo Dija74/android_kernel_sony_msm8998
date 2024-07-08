@@ -37,7 +37,7 @@ static DEFINE_PER_CPU(struct cpufreq_frequency_table *, freq_table);
 static bool hotplug_ready;
 
 /* Amount of time to boost all online CPUs upon exiting deep sleep */
-#define PM_WAKE_BOOST_MS (20)
+#define PM_WAKE_BOOST_MS (100)
 static bool is_boosted;
 static bool suspended_once;
 static struct mutex cpu_clk_lock;
@@ -419,8 +419,6 @@ static struct cpufreq_frequency_table *cpufreq_parse_dt(struct device *dev,
 		 * frequency.
 		 *
 		 */
-		if (j > 0 && f <= ftbl[j - 1].frequency)
-			continue;
 
 		ftbl[j].driver_data = j;
 		ftbl[j].frequency = f;
