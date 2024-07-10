@@ -5844,7 +5844,7 @@ static inline int __energy_diff(struct energy_env *eenv)
 
 #ifdef CONFIG_SCHED_TUNE
 
-struct target_nrg schedtune_target_nrg;
+extern struct target_nrg schedtune_target_nrg;  // Ubah ini menjadi extern
 
 #ifdef CONFIG_CGROUP_SCHEDTUNE
 extern bool schedtune_initialized;
