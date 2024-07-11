@@ -23,7 +23,7 @@ jobs:
       run: |
         echo "CLANG_PATH=${GITHUB_WORKSPACE}/dragon/bin" >> $GITHUB_ENV
         echo "PATH=${GITHUB_WORKSPACE}/aosp-clang/bin:${PATH}" >> $GITHUB_ENV
-        echo "CROSS_COMPILE=aarch-linux-gnu-" >> $GITHUB_ENV
+        echo "CROSS_COMPILE=aarch64-linux-gnu-" >> $GITHUB_ENV
         echo "CROSS_COMPILE_ARM32=arm-linux-gnueabi-" >> $GITHUB_ENV
         
     - name: Build the kernel
