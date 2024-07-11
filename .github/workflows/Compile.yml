@@ -16,29 +16,20 @@ jobs:
         sudo apt install nano bc bison ca-certificates curl flex gcc git libc6-dev libssl-dev openssl python-is-python3 ssh wget zip zstd sudo make clang gcc-arm-linux-gnueabi software-properties-common build-essential libarchive-tools gcc-aarch64-linux-gnu -y
         sudo apt install libssl-dev libffi-dev libncurses5 libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz python2 python3 -y
 
-    - name: Clone AOSP Clang
-      run: git clone https://github.com/Nicklas373/aosp-clang.git -b r412851 --depth=1
-
-    - name: Download and extract Android Linaro
-      run: |
-        wget https://releases.linaro.org/components/toolchain/binaries/7.2-2017.11/aarch64-linux-gnu/gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu.tar.xz
-        tar -xvf gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu.tar.xz
-        wget https://releases.linaro.org/components/toolchain/binaries/7.2-2017.11/arm-linux-gnueabi/gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabi.tar.xz
-        tar -xvf gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabi.tar.xz
+    - name: Clone DragonTC
+      run: git clone https://github.com/Hydra-Kernels/DragonTC.git -b 10.0 dragon
 
     - name: Set up environment variables
       run: |
-        echo "CLANG_PATH=${GITHUB_WORKSPACE}/aosp-clang/bin" >> $GITHUB_ENV
+        echo "CLANG_PATH=${GITHUB_WORKSPACE}/dragon/bin" >> $GITHUB_ENV
         echo "PATH=${GITHUB_WORKSPACE}/aosp-clang/bin:${PATH}" >> $GITHUB_ENV
-        echo "CLANG_TRIPLE=aarch64-linux-gnu-" >> $GITHUB_ENV
-        echo "CROSS_COMPILE=${GITHUB_WORKSPACE}/gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-" >> $GITHUB_ENV
-        echo "CROSS_COMPILE_ARM32=${GITHUB_WORKSPACE}/gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabi/bin/arm-linux-gnueabi-" >> $GITHUB_ENV
-
+        echo "CROSS_COMPILE=aarch-linux-gnu-" >> $GITHUB_ENV
+        echo "CROSS_COMPILE_ARM32=arm-linux-gnueabi-" >> $GITHUB_ENV
+        
     - name: Build the kernel
       env:
         CLANG_PATH: ${{ env.CLANG_PATH }}
         PATH: ${{ env.PATH }}
-        CLANG_TRIPLE: ${{ env.CLANG_TRIPLE }}
         CROSS_COMPILE: ${{ env.CROSS_COMPILE }}
         CROSS_COMPILE_ARM32: ${{ env.CROSS_COMPILE_ARM32 }}
       run: |
