@@ -1,96 +1,69 @@
-name: Compile and Release Kernel
+name: Compile
 
 on: [push]
 
 jobs:
-    build:
+  build:
     runs-on: ubuntu-latest
-    container: debian:stable-slim
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/pip
-            /usr/local/lib/python3.8/dist-packages
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-deps-
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cache
+          ~/android-ndk-r16b
+        key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-
 
-      - name: Install dependencies
-        run: |
-          sudo apt update -y && sudo apt upgrade -y
-          sudo apt install python3 python3-pip git zip unzip wget make clang gcc-arm-linux-gnueabi software-properties-common build-essential libarchive-tools gcc-aarch64-linux-gnu libssl-dev libffi-dev libncurses5 libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz python2 -y
-          pip3 install python-telegram-bot
+    - name: Install dependencies
+      run: |
+        sudo apt update -y
+        sudo apt install -y nano bc bison ca-certificates curl flex gcc git libc6-dev libssl-dev openssl python-is-python3 ssh wget zip zstd sudo make clang gcc-arm-linux-gnueabi software-properties-common build-essential libarchive-tools gcc-aarch64-linux-gnu
 
-      - name: Clone AOSP Clang
-        run: git clone https://github.com/Nicklas373/aosp-clang.git -b r383902 --depth=1
+    - name: Clone AOSP Clang
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: git clone https://github.com/Nicklas373/aosp-clang.git -b r383902 --depth=1
 
-      - name: Download and extract Android NDK
-        run: |
-          wget https://dl.google.com/android/repository/android-ndk-r16b-linux-x86_64.zip
-          unzip android-ndk-r16b-linux-x86_64.zip
+    - name: Download and extract Android NDK
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        wget https://dl.google.com/android/repository/android-ndk-r16b-linux-x86_64.zip
+        unzip android-ndk-r16b-linux-x86_64.zip
 
-      - name: Set up environment variables
-        run: |
-          echo "CLANG_PATH=${GITHUB_WORKSPACE}/aosp-clang/bin" >> $GITHUB_ENV
-          echo "PATH=${GITHUB_WORKSPACE}/aosp-clang/bin:${PATH}" >> $GITHUB_ENV
-          echo "CLANG_TRIPLE=aarch64-linux-gnu-" >> $GITHUB_ENV
-          echo "CROSS_COMPILE=${GITHUB_WORKSPACE}/android-ndk-r16b/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/aarch64-linux-android-" >> $GITHUB_ENV
-          echo "CROSS_COMPILE_ARM32=${GITHUB_WORKSPACE}/android-ndk-r16b/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-" >> $GITHUB_ENV
+    - name: Set up environment variables
+      run: |
+        echo "CLANG_PATH=${GITHUB_WORKSPACE}/aosp-clang/bin" >> $GITHUB_ENV
+        echo "PATH=${GITHUB_WORKSPACE}/aosp-clang/bin:${PATH}" >> $GITHUB_ENV
+        echo "CLANG_TRIPLE=aarch64-linux-gnu-" >> $GITHUB_ENV
+        echo "CROSS_COMPILE=${GITHUB_WORKSPACE}/android-ndk-r16b/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/aarch64-linux-android-" >> $GITHUB_ENV
+        echo "CROSS_COMPILE_ARM32=${GITHUB_WORKSPACE}/android-ndk-r16b/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-" >> $GITHUB_ENV
 
-      - name: Build the kernel
-        env:
-          CLANG_PATH: ${{ env.CLANG_PATH }}
-          PATH: ${{ env.PATH }}
-          CLANG_TRIPLE: ${{ env.CLANG_TRIPLE }}
-          CROSS_COMPILE: ${{ env.CROSS_COMPILE }}
-          CROSS_COMPILE_ARM32: ${{ env.CROSS_COMPILE_ARM32 }}
-        run: |
-          make CC=clang O=out ARCH=arm64 CROSS_COMPILE=${CROSS_COMPILE} CROSS_COMPILE_ARM32=${CROSS_COMPILE_ARM32} lineage-msm8998-yoshino-poplar_dsds_defconfig
-          make CC=clang O=out ARCH=arm64 CROSS_COMPILE=${CROSS_COMPILE} CROSS_COMPILE_ARM32=${CROSS_COMPILE_ARM32} -j$(nproc --all)
-
-      - name: Release
-        uses: ncipollo/release-binary@v1.10.0
-        with:
-          artifacts: "out/arch/arm64/boot/Image.gz-dtb"
-          tag: ${{ github.run_number }}
-          name: Kernel-Build-${{ github.run_number }}
-
-    - name: List output directory
-      run: ls -R out
+    - name: Build the kernel
+      env:
+        CLANG_PATH: ${{ env.CLANG_PATH }}
+        PATH: ${{ env.PATH }}
+        CLANG_TRIPLE: ${{ env.CLANG_TRIPLE }}
+        CROSS_COMPILE: ${{ env.CROSS_COMPILE }}
+        CROSS_COMPILE_ARM32: ${{ env.CROSS_COMPILE_ARM32 }}
+      run: |
+        make CC=clang O=out ARCH=arm64 CROSS_COMPILE=${CROSS_COMPILE} CROSS_COMPILE_ARM32=${CROSS_COMPILE_ARM32} lineage-msm8998-yoshino-poplar_dsds_defconfig
+        make CC=clang O=out ARCH=arm64 CROSS_COMPILE=${CROSS_COMPILE} CROSS_COMPILE_ARM32=${CROSS_COMPILE_ARM32} -j$(nproc --all)
 
     - name: Create Telegram script
       run: |
         cat << 'EOF' > kirimtele.sh
         #!/bin/bash
-
-        # Copyright 2024 Purrr
-        # Github @sandatjepil
-
-        # Ini Pengaturan buat kirim ke supergroup (grup bertopik)
-        # Set 1 untuk Ya | 0 untuk Tidak
         TG_SUPER=0
-
-        # Isi token BOT disini
-        TG_TOKEN=7459706383:AAEEPCQkEALnVX8i_qOaZR1_B4aj4ulepxM
-
-        # isi ID channel atau grup
-        # Pastikan botnya sudah jadi admin
+        TG_TOKEN=5136791856:AAFxUsMFfPD7E0CFHKUCBIlUOUOI0yFq59Q
         CHATID=-1002171568705
-        # kalo grupnya bertopic isi ini, kalo ngga kosongin aja
         TOPICID=
-
-        #################################################
-        # BAGIAN INI JANGAN DISENTUH!!
-        #################################################
         BOT_MSG_URL="https://api.telegram.org/bot$TG_TOKEN/sendMessage"
         BOT_BUILD_URL="https://api.telegram.org/bot$TG_TOKEN/sendDocument"
-
         tg_post_msg(){
             if [ $TG_SUPER = 1 ]; then
                 RESPONSE=$(curl -s -X POST "$BOT_MSG_URL" \
@@ -108,12 +81,8 @@ jobs:
             fi
             echo "Response: $RESPONSE"
         }
-
         tg_post_build(){
-            #Post MD5Checksum alongwith for easeness
             MD5CHECK=$(md5sum "$1" | cut -d' ' -f1)
-
-            #Show the Checksum alongwith caption
             if [ $TG_SUPER = 1 ]; then
                 RESPONSE=$(curl --no-progress-meter -F document=@"$1" "$BOT_BUILD_URL" \
                 -F chat_id="$CHATID"  \
@@ -132,7 +101,6 @@ jobs:
             fi
             echo "Response: $RESPONSE"
         }
-
         case "$1" in
           file)
             PESAN=$(tg_post_build "$2" "$3" | grep '"ok":')
@@ -166,9 +134,6 @@ jobs:
             echo "untuk cara penggunaan"
             ;;
         esac
-        #################################################
-        # BAGIAN INI JANGAN DISENTUH!!
-        #################################################
         EOF
         chmod +x kirimtele.sh
 
