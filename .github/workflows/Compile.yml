@@ -18,7 +18,10 @@ jobs:
         sudo apt install libssl-dev libffi-dev libncurses5 libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz python2 python3 -y
 
     - name: Clone AOSP Clang
-      run: git clone https://gitlab.com/LeCmnGend/clang.git -b clang-15 --depth=1 clang
+      run: | 
+        wget https://github.com/ZyCromerZ/Clang/releases/download/14.0.6-20240212-release/Clang-14.0.6-20240212.tar.gz
+        tar -xvf Clang-14.0.6-20240212.tar.gz
+        mv Clang-14.0.6-20240212.tar.gz clang
 
     - name: Download and extract Linaro
       run: |
