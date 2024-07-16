@@ -17,7 +17,7 @@ jobs:
         sudo apt install libssl-dev libffi-dev libncurses5 libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz python2 python3 -y
 
     - name: Clone AOSP Clang
-      run: git clone https://gitlab.com/LeCmnGend/clang.git -b clang-15 --depth=1 proton-15
+      run: git clone https://gitlab.com/Jprimero15/prebuilts_clang_host_linux-x86_clang-r475365.git --depth=1 clang
 
     - name: Download and extract Android NDK
       run: |
@@ -26,7 +26,7 @@ jobs:
 
     - name: Set up environment variables
       run: |
-        echo "CLANG_PATH=${GITHUB_WORKSPACE}/proton-15/bin" >> $GITHUB_ENV
+        echo "CLANG_PATH=${GITHUB_WORKSPACE}/clang/bin" >> $GITHUB_ENV
         echo "PATH=${GITHUB_WORKSPACE}/aosp-clang/bin:${PATH}" >> $GITHUB_ENV
         echo "CLANG_TRIPLE=aarch64-linux-gnu-" >> $GITHUB_ENV
         echo "CROSS_COMPILE=${GITHUB_WORKSPACE}/android-ndk-r16b/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/aarch64-linux-android-" >> $GITHUB_ENV
