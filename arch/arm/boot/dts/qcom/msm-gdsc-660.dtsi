@@ -146,14 +146,4 @@
 		reg = <0x5066090 0x4>;
 	};
 
-	gdsc_gpu_gx: qcom,gdsc@5066094 {
-		compatible = "qcom,gdsc";
-		regulator-name = "gdsc_gpu_gx";
-		reg = <0x5066094 0x4>;
-		domain-addr = <&gpu_gx_domain_addr>;
-		sw-reset = <&gpu_gx_sw_reset>;
-		qcom,retain-periph;
-		qcom,reset-aon-logic;
-		status = "disabled";
-	};
 };
