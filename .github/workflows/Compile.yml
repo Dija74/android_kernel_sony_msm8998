@@ -17,7 +17,7 @@ jobs:
         sudo apt install libssl-dev libffi-dev libncurses5 libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz python2 python3 -y
 
     - name: Clone AOSP Clang
-      run: git clone https://gitlab.com/Jprimero15/prebuilts_clang_host_linux-x86_clang-r475365.git --depth=1 clang
+      run: git clone https://github.com/Nicklas373/aosp-clang.git -b r412851 --depth=1 clang
 
     - name: Download and extract Android NDK
       run: |
