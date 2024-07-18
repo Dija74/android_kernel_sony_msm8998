@@ -303,7 +303,7 @@ static int mdss_mdp_cmd_tearcheck_cfg(struct mdss_mdp_mixer *mixer,
 	pinfo = &ctl->panel_data->panel_info;
 	te = &ctl->panel_data->panel_info.te;
 
-	mdss_mdp_vsync_clk_enable(1, locked);
+	mdss_mdp_vsync_clk_enable(0, locked);
 
 	vsync_clk_speed_hz =
 		mdss_mdp_get_clk_rate(MDSS_CLK_MDP_VSYNC, locked);
