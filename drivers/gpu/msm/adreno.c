@@ -71,7 +71,7 @@ static unsigned int counter_delta(struct kgsl_device *device,
 
 static struct devfreq_msm_adreno_tz_data adreno_tz_data = {
 	.bus = {
-		.max = 350,
+		.max = 500,
 	},
 	.device_id = KGSL_DEVICE_3D0,
 };
@@ -129,10 +129,10 @@ static unsigned int adreno_ft_regs_default[] = {
 };
 
 /* Nice level for the higher priority GPU start thread */
-int adreno_wake_nice = -7;
+int adreno_wake_nice = -20;
 
 /* Number of milliseconds to stay active active after a wake on touch */
-unsigned int adreno_wake_timeout = 100;
+unsigned int adreno_wake_timeout = 1000;
 
 /**
  * adreno_readreg64() - Read a 64bit register by getting its offset from the
